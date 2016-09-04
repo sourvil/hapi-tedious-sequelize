@@ -1,7 +1,55 @@
 'use strict';
 
+
 const Hapi = require('hapi');
 const Good = require('good');
+const Sequelize = require("sequelize");
+
+var sequelize = new Sequelize('sequelize', 'seq_user', 'seq_password', {
+    host: 'localhost',
+    dialect: 'mssql',
+
+    pool: {
+        max: 5,
+        min: 0,
+        idle: 10000
+    },
+});
+
+sequelize
+    .authenticate()
+    .then(function (err) {
+        console.log('Connection has been established successfully.');
+
+        var User = sequelize.define('user', {
+            firstName: {
+                type: Sequelize.STRING
+            },
+            lastName: {
+                type: Sequelize.STRING
+            }
+        });
+
+        // force: true will drop the table if it already exists
+        User.sync().then(function () {
+            // Table created
+            return User.create({
+                firstName: 'Burak',
+                lastName: 'Donbay'
+            });
+        });
+
+        User.findById(1).then(function (u) {
+            // project will be an instance of Project and stores the content of the table entry
+            // with id 123. if such an entry is not defined you will get null
+            console.log("User:" + u.firstName + " " + u.lastName);
+        });
+
+
+    })
+    .catch(function (err) {
+        console.log('Unable to connect to the database:', err);
+    });
 
 // Create a server with a host and port
 const server = new Hapi.Server();
@@ -59,8 +107,8 @@ server.register({
                     log: '*'
                 }]
             }, {
-                module: 'good-console'
-            }, 'stdout']
+                    module: 'good-console'
+                }, 'stdout']
         }
     }
 }, (err) => {
