@@ -9,7 +9,9 @@
     "good-squeeze": "^4.0.0",
     "hapi": "^15.0.3",
     "inert": "^4.0.2",
-    "nodemon": "^1.10.2"
+    "nodemon": "^1.10.2",
+    "sequelize": "^3.24.1",
+    "tedious": "^1.14.0"
   },
   "devDependencies": {},
   "scripts": {
