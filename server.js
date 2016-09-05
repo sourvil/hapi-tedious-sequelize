@@ -21,35 +21,63 @@ sequelize
     .then(function (err) {
         console.log('Connection has been established successfully.');
 
+        // load model
         var User = sequelize.define('user', {
             firstName: {
                 type: Sequelize.STRING
             },
             lastName: {
                 type: Sequelize.STRING
+            },
+            nickName: {
+                type: Sequelize.STRING
             }
         });
 
-        // force: true will drop the table if it already exists
-        User.sync().then(function () {
-            // Table created
-            return User.create({
-                firstName: 'Burak',
-                lastName: 'Donbay'
+        // create model /table schema 
+        // force used, be careful!
+        User.sync({ force: true }).then(function () {
+
+            // find the user of id : 2, if not create 
+            User.create({ firstName: 'Burak', lastName: 'Donbay', nickName: 'burak.donbay' })
+                .then(function () {
+
+                });
+
+            // log first user by id : 1
+            User.findById(1).then(function (u) {
+                if (u)
+                    console.log("User:" + u.firstName + " " + u.lastName + " " + u.nickName);
+
+                // update of the user by id : 1
+                User.find({ where: { id: '1' } })
+                    .then(function (user) {
+                        // Check if record exists in database
+                        console.log('update id of 1: ' + user);
+
+                        if (user) {
+                            user.updateAttributes({
+                                nickName: 'Sourvil'
+                            })
+                                .then(function () {
+
+                                    // log first user by id : 1
+                                    User.findById(1).then(function (u) {
+                                        if (u)
+                                            console.log("User:" + u.firstName + " " + u.lastName + " " + u.nickName);
+
+                                    });
+
+                                })
+                        }
+                    });
             });
         });
-
-        User.findById(1).then(function (u) {
-            // project will be an instance of Project and stores the content of the table entry
-            // with id 123. if such an entry is not defined you will get null
-            console.log("User:" + u.firstName + " " + u.lastName);
-        });
-
-
     })
     .catch(function (err) {
         console.log('Unable to connect to the database:', err);
     });
+
 
 // Create a server with a host and port
 const server = new Hapi.Server();
@@ -70,7 +98,6 @@ server.register(require('inert'), (err) => {
         method: 'GET',
         path: '/hello',
         handler: function (request, reply) {
-
             return reply('hello world');
         }
     });
@@ -81,6 +108,32 @@ server.register(require('inert'), (err) => {
         path: '/intro',
         handler: function (request, reply) {
             reply.file('./public/intro.html');
+        }
+    });
+
+    // Intro Route
+    server.route({
+        method: 'GET',
+        path: '/seq',
+        handler: function (request, reply) {
+
+            // load model
+            var User = sequelize.define('user', {
+                firstName: {
+                    type: Sequelize.STRING
+                },
+                lastName: {
+                    type: Sequelize.STRING
+                },
+                nickName: {
+                    type: Sequelize.STRING
+                }
+            });
+            // save user
+            User.create({ firstName: 'Dilek', lastName: 'Donbay', nickName: 'dilek.donbay' })
+                .then(function (u) {
+                    return reply(u.nickName + ' is created. Id: ' + u.id);
+                });
         }
     });
 
